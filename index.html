@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<meta charset="utf-8">
+<title>King Slayers Times</title>
+<style type="text/css">body {background-color:#ddd;margin-left:2.5em;}#mumble{display:none;}.foot{position:fixed;bottom:1em;right:2em;}</style>
+</head>
+<body>
+<p><strong>Your current time: </strong><span id="timecur"></span> </p>
+<p>Assuming the above is correct, all of the below should be correct (it relys on your time being correct)</p>
+<h3><span id="timeserver"></span> (SERVER / FRANCE)</h3>
+<h3><span id="timeuk"></span> (UK / GMT+0 / <span style="font-size:0.8em;">somethings this is the server time... who the fuck knows why</span>)</h3>
+<h3><span id="timeest"></span> (EST)</h3>
+<h3><span id="timenz"></span> (NEW ZEALAND)</h3>
+<script>
+//all this below calculates gaylight savings
+function lastsun(y,m) {
+ var dat = new Date(y+'/'+m+'/0')
+    ,currentmonth = m
+    ,firstsunday = false;
+  while (currentmonth === m){
+    firstsunday = dat.getDay() === 0 || firstsunday;
+    dat.setDate(dat.getDate()+(firstsunday ? 7 : 1));
+    currentmonth = dat.getMonth()+1;
+  }
+  dat.setDate(dat.getDate()-7);
+  return dat;
+}
+function dstUSA(){
+var today = new Date;
+var yr = today.getFullYear();
+var dst_start = new Date("March 14, "+yr+" 02:00:00"); 
+var dst_end = new Date("November 07, "+yr+" 02:00:00"); 
+var day = dst_start.getDay();
+dst_start.setDate(14-day);
+day = dst_end.getDay(); 
+dst_end.setDate(7-day); 
+if (today >= dst_start && today < dst_end){ 
+var dlt = 3600000; //day light savings on  USA
+return dlt;
+}
+var dlt = 0; //day light savings off USA
+return dlt;
+}
+function dstNZ(){
+var today = new Date;
+var yr = today.getFullYear();
+var dst_start = new Date("September 30, "+yr+" 02:00:00"); 
+var dst_end = new Date("April 07, "+yr+" 03:00:00"); 
+var day = dst_start.getDay();
+dst_start = lastsun(yr,9);
+day = dst_end.getDay(); 
+dst_end.setDate(7-day);
+if (today <= dst_start && today < dst_end){
+var nzst = 3600000; //day light savings on  NZ
+return nzst;
+}
+var nzst = 0; //day light savings off NZ
+return nzst;
+}
+function dstEUROPE(){
+var today = new Date;
+var yr = today.getFullYear();
+var dst_start = lastsun(yr, 3);
+var dst_end = lastsun(yr, 10);
+if (today >= dst_start && today < dst_end){ 
+var bst = 3600000; //day light savings on Europe
+return bst;
+}
+var bst = 0; //day light savings off Europe
+return bst;
+}
+var dlt = dstUSA();      //daylight savings time 
+var bst = dstEUROPE();  //Europe savings time
+var nzst = dstNZ();      //oceanic savings time
+//end gaylight savings
+
+//actual time calculations
+var hour = 3600000;
+
+function timecur() {
+	var dc = new Date();
+	dc.getHours();
+	dc.getMinutes(); 
+	dc.getSeconds(); 
+	document.getElementById("timecur").innerHTML=dc;	
+}
+function timeserver() {
+	var t = Math.round(new Date().getTime()/1000.0);
+	var d = new Date(t*1000+(hour * 1)+bst).toUTCString();
+	var s = d.substr(0, d.length - 3);
+	document.getElementById("timeserver").innerHTML=s;	
+}
+function timeuk() {
+	var t = Math.round(new Date().getTime()/1000.0);
+	var d = new Date(t*1000+(hour * 0)+bst).toUTCString();
+	var s = d.substr(0, d.length - 3);
+	document.getElementById("timeuk").innerHTML=s;	
+}
+function timeest() {
+	var t = Math.round(new Date().getTime()/1000.0);
+	var d = new Date(t*1000-(hour * 5)+dlt).toUTCString();
+	var s = d.substr(0, d.length - 3);
+	document.getElementById("timeest").innerHTML=s;	
+}
+function timenz() {
+	var t = Math.round(new Date().getTime()/1000.0);
+	var d = new Date(t*1000+(hour * 12)+nzst).toUTCString();
+	var s = d.substr(0, d.length - 3);
+	document.getElementById("timenz").innerHTML=s;	
+}
+
+//update all the shit every 1 second
+setInterval("timecur()", 1000);
+setInterval("timeserver()", 1000);
+setInterval("timeuk()", 1000);
+setInterval("timeest()", 1000);
+setInterval("timenz()", 1000);
+</script>
+</body>
+
+<!-- come on now kids, that wasn't so hard now was it? - nuckchorris -->
+
+</html>
